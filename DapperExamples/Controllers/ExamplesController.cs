@@ -81,11 +81,10 @@ SELECT  [Order Details].* FROM [Order Details]  JOIN Products ON [Order Details]
         [Route("queryMultiplePerformance")]
         public IActionResult QueryMultiplePerformance()
         {
-            List<Product> produto = null;
             var name = $"%chef%";
             var stop = Stopwatch.StartNew();
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 5000; i++)
             {
 
                 using (var cn = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -98,7 +97,7 @@ SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details
 ";
                     using (var result = cn.QueryMultiple(query, new { name }))
                     {
-                        produto = result.Read<Product>().ToList();
+                        var produto = result.Read<Product>().ToList();
                         produto.Map(result.Read<OrderDetail>(), prod => prod.ProductId, order => order.ProductId, (prod, details) => prod.OrderDetails = details.ToList());
                     }
                 }
@@ -118,7 +117,7 @@ SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details
             var name = $"%chef%";
             var stop = Stopwatch.StartNew();
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 5000; i++)
             {
 
                 using (var cn = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -127,23 +126,23 @@ SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details
 
                     var productDictionary = new Dictionary<int, Product>();
                     var query = @"SELECT * FROM Products JOIN  [Order Details] ON  [Order Details].ProductId = Products.ProductId WHERE Products.ProductName like @name";
-                    var list = cn.Query<Product, OrderDetail, Product>(query,
-        (product, orderDetail) =>
-        {
-            Product productEntry;
-
-            if (!productDictionary.TryGetValue(product.ProductId, out productEntry))
-            {
-                productEntry = product;
-                productEntry.OrderDetails = new List<OrderDetail>();
-                productDictionary.Add(productEntry.ProductId, productEntry);
-            }
-            productEntry.OrderDetails.Add(orderDetail);
-            return productEntry;
-        }, new { name },
-        splitOn: "OrderID")
-    .Distinct()
-    .ToList();
+                    var list = cn.Query<Product, OrderDetail, Product>(
+                            query,
+                            (product, orderDetail) =>
+                            {
+                                if (!productDictionary.TryGetValue(product.ProductId, out var productEntry))
+                                {
+                                    productEntry = product;
+                                    productEntry.OrderDetails = new List<OrderDetail>();
+                                    productDictionary.Add(productEntry.ProductId, productEntry);
+                                }
+                                productEntry.OrderDetails.Add(orderDetail);
+                                return productEntry;
+                            }, 
+                            new { name },
+                            splitOn: "OrderID")
+                            .Distinct()
+                            .ToList();
                 }
             }
 
