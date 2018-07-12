@@ -26,8 +26,6 @@ namespace DapperExamples.Controllers
         /// <summary>
         /// Get product by Id
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns>Product, OrdersDetail</returns>
         [HttpGet]
         [Route("getProductByIdAndOrders"), ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
         public IActionResult GetOneProductAndOrders(int id)
@@ -39,7 +37,7 @@ namespace DapperExamples.Controllers
 
                 var query = @"
 SELECT * FROM Products WHERE ProductID = @Id
-SELECT * FROM OrderDetails WHERE ProductID = @Id
+SELECT * FROM  [Order Details] WHERE ProductID = @Id
 ";
                 using (var result = cn.QueryMultiple(query, new { id }))
                 {
@@ -53,8 +51,6 @@ SELECT * FROM OrderDetails WHERE ProductID = @Id
         /// <summary>
         /// Get products by name
         /// </summary>
-        /// <param name="name">default: chef</param>
-        /// <returns>Product, OrdersDetail</returns>
         [HttpGet]
         [Route("getProductsByName")]
         public IActionResult GetProductsByName(string name = "chef")
@@ -67,7 +63,7 @@ SELECT * FROM OrderDetails WHERE ProductID = @Id
 
                 var query = @"
 SELECT * FROM Products WHERE ProductName like @name
-SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId = Products.ProductId WHERE Products.ProductName like @name
+SELECT  [Order Details].* FROM [Order Details]  JOIN Products ON [Order Details].ProductId = Products.ProductId WHERE Products.ProductName like @name
 ";
                 using (var result = cn.QueryMultiple(query, new { name }))
                 {
@@ -79,10 +75,8 @@ SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId 
         }
 
         /// <summary>
-        /// Get products by name
+        /// Test performance using QueryMultiple
         /// </summary>
-        /// <param name="name">default: chef</param>
-        /// <returns>Product, OrdersDetail</returns>
         [HttpGet]
         [Route("queryMultiplePerformance")]
         public IActionResult QueryMultiplePerformance()
@@ -91,7 +85,7 @@ SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId 
             var name = $"%chef%";
             var stop = Stopwatch.StartNew();
 
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 500; i++)
             {
 
                 using (var cn = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -100,7 +94,7 @@ SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId 
 
                     var query = @"
 SELECT * FROM Products WHERE ProductName like @name
-SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId = Products.ProductId WHERE Products.ProductName like @name
+SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details].ProductId = Products.ProductId WHERE Products.ProductName like @name
 ";
                     using (var result = cn.QueryMultiple(query, new { name }))
                     {
@@ -115,10 +109,8 @@ SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId 
         }
 
         /// <summary>
-        /// Get products by name
+        /// Test performance using MultiMapping
         /// </summary>
-        /// <param name="name">default: chef</param>
-        /// <returns>Product, OrdersDetail</returns>
         [HttpGet]
         [Route("multiMappingMultiplePerformance")]
         public IActionResult MultiMappingMultiplePerformance()
@@ -126,7 +118,7 @@ SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId 
             var name = $"%chef%";
             var stop = Stopwatch.StartNew();
 
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 500; i++)
             {
 
                 using (var cn = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -134,7 +126,7 @@ SELECT OrderDetails.* FROM OrderDetails JOIN Products ON OrderDetails.ProductId 
                     cn.Open();
 
                     var productDictionary = new Dictionary<int, Product>();
-                    var query = @"SELECT * FROM Products JOIN OrderDetails ON OrderDetails.ProductId = Products.ProductId WHERE Products.ProductName like @name";
+                    var query = @"SELECT * FROM Products JOIN  [Order Details] ON  [Order Details].ProductId = Products.ProductId WHERE Products.ProductName like @name";
                     var list = cn.Query<Product, OrderDetail, Product>(query,
         (product, orderDetail) =>
         {
