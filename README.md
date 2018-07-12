@@ -1,7 +1,7 @@
 # DapperExamples
 Utilizando o QueryMultiple
 
-<img src="https://www.saindodacaixinha.com.br/content/images/2018/05/wasm3.png" width="480" />
+<img src="https://www.brunobrito.net.br/content/images/2018/07/redes.jpg" width="480" />
 
 # Dapper - Exemplos
 
