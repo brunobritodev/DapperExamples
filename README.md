@@ -13,7 +13,7 @@ Tecnologias utilizadas:
 * Framework 2.1
 * ASP.NET Core
 * Swagger
-* Sql Server Express
+* Sql Server
 * Northwind database
 
 # Como rodar
