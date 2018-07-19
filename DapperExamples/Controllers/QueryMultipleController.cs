@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -14,11 +15,11 @@ using Microsoft.Extensions.Configuration;
 namespace DapperExamples.Controllers
 {
     [Route("[controller]")]
-    public class ExamplesController : ControllerBase
+    public class QueryMultipleController : ControllerBase
     {
         private readonly IConfiguration configuration;
 
-        public ExamplesController(IConfiguration configuration)
+        public QueryMultipleController(IConfiguration configuration)
         {
             this.configuration = configuration;
         }
@@ -27,8 +28,8 @@ namespace DapperExamples.Controllers
         /// Get product by Id
         /// </summary>
         [HttpGet]
-        [Route("getProductByIdAndOrders"), ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
-        public IActionResult GetOneProductAndOrders(int id)
+        [Route("GetProductAndOrderByProductId"), ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
+        public IActionResult GetProductAndOrderByProductId(int id)
         {
             Product produto = null;
             using (var cn = new SqlConnection(configuration.GetConnectionString("DefaultConnection")))
@@ -52,7 +53,7 @@ SELECT * FROM  [Order Details] WHERE ProductID = @Id
         /// Get products by name
         /// </summary>
         [HttpGet]
-        [Route("getProductsByName")]
+        [Route("GetProductsByName")]
         public IActionResult GetProductsByName(string name = "chef")
         {
             List<Product> produto = null;
@@ -78,7 +79,7 @@ SELECT  [Order Details].* FROM [Order Details]  JOIN Products ON [Order Details]
         /// Test performance using QueryMultiple
         /// </summary>
         [HttpGet]
-        [Route("queryMultiplePerformance")]
+        [Route("QueryMultiplePerformance")]
         public IActionResult QueryMultiplePerformance()
         {
             var name = $"%chef%";
@@ -111,7 +112,7 @@ SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details
         /// Test performance using MultiMapping
         /// </summary>
         [HttpGet]
-        [Route("multiMappingMultiplePerformance")]
+        [Route("MultiMappingMultiplePerformance")]
         public IActionResult MultiMappingMultiplePerformance()
         {
             var name = $"%chef%";
@@ -138,7 +139,7 @@ SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details
                                 }
                                 productEntry.OrderDetails.Add(orderDetail);
                                 return productEntry;
-                            }, 
+                            },
                             new { name },
                             splitOn: "OrderID")
                             .Distinct()
@@ -149,5 +150,7 @@ SELECT  [Order Details].* FROM  [Order Details] JOIN Products ON  [Order Details
             stop.Stop();
             return Ok(stop.ElapsedMilliseconds);
         }
+
+
     }
 }

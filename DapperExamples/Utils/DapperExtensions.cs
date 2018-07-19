@@ -1,35 +1,37 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DapperExamples.Utils
 {
-public static class DapperExtensions
-{
-    public static void Map<TFirst, TSecond, TKey>
-    (
-        this IEnumerable<TFirst> list,
-        IEnumerable<TSecond> child,
-        Func<TFirst, TKey> firstKey,
-        Func<TSecond, TKey> secondKey,
-        Action<TFirst, IEnumerable<TSecond>> addChildren
-    )
+    public static class DapperExtensions
     {
-        var childMap = child.GroupBy(secondKey).ToDictionary(g => g.Key, g => g.AsEnumerable());
-
-        Parallel.ForEach(list, item =>
+        public static void Map<TFirst, TSecond, TKey>
+        (
+            this IEnumerable<TFirst> list,
+            IEnumerable<TSecond> child,
+            Func<TFirst, TKey> firstKey,
+            Func<TSecond, TKey> secondKey,
+            Action<TFirst, IEnumerable<TSecond>> addChildren
+        )
         {
-            if (!childMap.Any()) return;
-            IEnumerable<TSecond> children;
+            var childMap = child.GroupBy(secondKey).ToDictionary(g => g.Key, g => g.AsEnumerable());
 
-            var first = firstKey(item);
-
-            if (first != null && childMap.TryGetValue(first, out children))
+            Parallel.ForEach(list, item =>
             {
-                addChildren(item, children);
-            }
-        });
+                if (!childMap.Any()) return;
+                IEnumerable<TSecond> children;
+
+                var first = firstKey(item);
+
+                if (first != null && childMap.TryGetValue(first, out children))
+                {
+                    addChildren(item, children);
+                }
+            });
+        }
     }
-}
 }

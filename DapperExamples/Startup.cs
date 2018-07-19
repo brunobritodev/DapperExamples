@@ -59,7 +59,6 @@ namespace DapperExamples
             {
                 app.UseHsts();
             }
-
             app.UseMvc();
 
             app.UseSwagger(c =>
