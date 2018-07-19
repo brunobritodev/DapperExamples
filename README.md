@@ -25,5 +25,6 @@ Tecnologias utilizadas:
 Detalhes da implementação disponivel em
 
 [Bruno Brito - Dapper - .NET Core Tutorial - QueryMultiple](https://www.brunobrito.net.br/dapper-tutorial-i/)
+
 [Bruno Brito - Dapper - Em detalhes](https://www.brunobrito.net.br/dapper-em-detalhes/)
 
